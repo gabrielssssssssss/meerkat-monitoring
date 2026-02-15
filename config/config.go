@@ -1,10 +1,9 @@
-package models
+package config
 
 type Config struct {
 	Database struct {
 		Host string `yaml:"host"`
-		Port string `json:"port"`
+		Port string `yaml:"port"`
 	} `yaml:"database"`
-	CT struct {
-	} `yaml:"ct_logs"`
+	CtLogs []string `yaml:"ct_logs"`
 }
