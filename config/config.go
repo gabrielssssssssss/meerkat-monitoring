@@ -5,5 +5,6 @@ type Config struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`
 	} `yaml:"database"`
-	CtLogs []string `yaml:"ct_logs"`
+	GitPath []string `json:"git_paths"`
+	CtLogs  []string `yaml:"ct_logs"`
 }

@@ -1,9 +1,9 @@
-package transparency
+package githarvest
 
 import "errors"
 
 var (
-	ErrUnknownEntryType = errors.New("unknown entry type")
+	ErrCreateRequest = errors.New("failed to create http request")
 
 	ErrExecRequest = errors.New("failed to execute http request")
 

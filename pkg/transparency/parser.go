@@ -24,7 +24,7 @@ func ParseLeafInput(leafInput string) (string, error) {
 			return domain, nil
 		}
 	default:
-		return "", ErrUnknowEntryType
+		return "", ErrUnknownEntryType
 	}
-	return "", ErrUnknowEntryType
+	return "", ErrUnknownEntryType
 }
