@@ -22,7 +22,15 @@ func main() {
 	}
 
 	hitRepo := repository.NewHitRepository(db, cfg)
+	transparencyRepo := repository.NewTransparencyRepository(db, cfg)
+
 	hitService := service.NewHitService(hitRepo)
+	transparencyService := service.NewTransparencyService(transparencyRepo)
+
+	err = transparencyService.CreateDomainIndex()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	hit := models.Hit{
 		URL:        "https://test.com",

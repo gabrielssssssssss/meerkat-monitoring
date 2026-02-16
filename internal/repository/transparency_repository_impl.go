@@ -7,7 +7,9 @@ import (
 )
 
 type TransparencyRepository interface {
-	CreateDomainIndex(hits *models.Hit) error
+	CreateDomainIndex() error
+	Create(*models.Transparency) error
+	FindByDomain(string) (*models.Transparency, error)
 }
 
 type transparencyRepositoryImpl struct {

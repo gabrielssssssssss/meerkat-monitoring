@@ -8,22 +8,52 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func (r transparencyRepositoryImpl) CreateDomainIndex(transparency *models.Hit) error {
+func (r transparencyRepositoryImpl) CreateDomainIndex() error {
 	ctx, cancel := config.NewMongoContext()
 	defer cancel()
 
 	db := r.client.Database(r.config.Database.Name)
 	collection := db.Collection("transparency")
 
-	indexModel := mongo.IndexModel{
-		Keys:    bson.D{{Key: "domain", Value: 1}},
+	_, err := collection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    bson.M{"domain": 1},
 		Options: options.Index().SetName("idx_domain_fast"),
-	}
-
-	_, err := collection.Indexes().CreateOne(ctx, indexModel)
+	})
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (r transparencyRepositoryImpl) Create(transparency *models.Transparency) error {
+	ctx, cancel := config.NewMongoContext()
+	defer cancel()
+
+	db := r.client.Database(r.config.Database.Name)
+	collection := db.Collection("transparency")
+
+	_, err := collection.InsertOne(ctx, transparency)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r transparencyRepositoryImpl) FindByDomain(domain string) (*models.Transparency, error) {
+	ctx, cancel := config.NewMongoContext()
+	defer cancel()
+
+	db := r.client.Database(r.config.Database.Name)
+	collection := db.Collection("transparency")
+
+	var results models.Transparency
+
+	err := collection.FindOne(ctx, bson.M{"domain": domain}).Decode(&results)
+	if err != nil {
+		return nil, err
+	}
+
+	return &results, nil
 }
