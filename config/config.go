@@ -17,7 +17,6 @@ type Config struct {
 }
 
 func (c *Config) Load(env string) (*Config, error) {
-	// If c is nil, allocate it so yaml.Unmarshal has a place to write
 	if c == nil {
 		c = &Config{}
 	}
@@ -27,7 +26,6 @@ func (c *Config) Load(env string) (*Config, error) {
 		return nil, err
 	}
 
-	// Now 'c' is a valid pointer to a Config struct
 	err = yaml.Unmarshal(yamlFile, c)
 	if err != nil {
 		return nil, err
