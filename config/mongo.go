@@ -1,23 +1,28 @@
 package config
 
-// import (
-// 	"fmt"
+import (
+	"context"
+	"fmt"
+	"time"
 
-// 	"github.com/gabrielssssssssss/meerkat-monitoring/models"
-// 	"go.mongodb.org/mongo-driver/v2/mongo"
-// 	"go.mongodb.org/mongo-driver/v2/mongo/options"
-// )
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+)
 
-// func NewMongoDatabase(cfg *models.Config) (*mongo.Client, error) {
-// 	url := fmt.Sprintf("mongodb://%s:%s",
-// 		cfg.Database.Host,
-// 		cfg.Database.Port,
-// 	)
+func NewMongoDatabase(cfg *Config) (*mongo.Client, error) {
+	uri := fmt.Sprintf("mongodb://%s:%s",
+		cfg.Database.Host,
+		cfg.Database.Port,
+	)
 
-// 	client, err := mongo.Connect(options.Client().ApplyURI(url))
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	if err != nil {
+		return nil, err
+	}
 
-// 	return client, nil
-// }
+	return client, nil
+}
+
+func NewMongoContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), 30*time.Second)
+}
