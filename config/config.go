@@ -7,6 +7,11 @@ import (
 )
 
 type Config struct {
+	Telegram struct {
+		BotToken           string `yaml:"bot_token"`
+		TransparencyChatID int64  `yaml:"transparency_chat_id"`
+		GitharvestChatID   int64  `yaml:"githarvest_chat_id"`
+	} `yaml:"telegram"`
 	Database struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`
