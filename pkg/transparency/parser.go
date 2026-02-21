@@ -1,6 +1,8 @@
 package transparency
 
 import (
+	"encoding/base64"
+
 	ct "github.com/google/certificate-transparency-go"
 	ctTls "github.com/google/certificate-transparency-go/tls"
 	ctX509 "github.com/google/certificate-transparency-go/x509"
@@ -8,8 +10,16 @@ import (
 
 // https://gist.github.com/dvas0004/c6037de1ef6bc66e6d52b3d562ad690c
 func ParseLeafInput(leafInput string) (string, error) {
+	decodedLeaf, err := base64.StdEncoding.DecodeString(leafInput)
+	if err != nil {
+		return "", err
+	}
+
 	var payload ct.MerkleTreeLeaf
-	ctTls.Unmarshal([]byte(leafInput), &payload)
+	_, err = ctTls.Unmarshal([]byte(decodedLeaf), &payload)
+	if err != nil {
+		return "", err
+	}
 
 	switch eType := payload.TimestampedEntry.EntryType; eType {
 	case 0:

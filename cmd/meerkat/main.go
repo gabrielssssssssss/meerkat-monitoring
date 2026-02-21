@@ -1,20 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"time"
 
 	"github.com/gabrielssssssssss/meerkat-monitoring/config"
-	"github.com/gabrielssssssssss/meerkat-monitoring/internal/models"
 	"github.com/gabrielssssssssss/meerkat-monitoring/internal/repository"
+	"github.com/gabrielssssssssss/meerkat-monitoring/internal/runner"
 	"github.com/gabrielssssssssss/meerkat-monitoring/internal/service"
 	"github.com/gabrielssssssssss/meerkat-monitoring/pkg/githarvest"
+	"github.com/gabrielssssssssss/meerkat-monitoring/pkg/transparency"
 )
 
 func main() {
+	options := runner.ParseOptions()
+
 	cfg := &config.Config{}
-	cfg.Load("env.yaml")
+	cfg.Load(options.Cfg)
 
 	db, err := config.NewMongoDatabase(cfg)
 	if err != nil {
@@ -27,29 +28,10 @@ func main() {
 	hitService := service.NewHitService(hitRepo)
 	transparencyService := service.NewTransparencyService(transparencyRepo)
 
-	err = transparencyService.CreateDomainIndex()
-	if err != nil {
-		log.Fatal(err)
-	}
+	gitHarvestClient := githarvest.NewClient()
+	transparencyClient := transparency.NewClient()
 
-	hit := models.Hit{
-		URL:        "https://test.com",
-		Path:       "/.git/config",
-		Token:      "aadzadzaa",
-		UserGithub: githarvest.UserGithub{},
-		UpdatedAt:  time.Now(),
-		CreatedAt:  time.Now(),
-	}
+	runner := runner.NewRunner(options, cfg, hitService, transparencyService, gitHarvestClient, transparencyClient)
 
-	hitService.Create(&hit)
-
-	resultsn, err := hitService.FindsByURL("https://test.com")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, res := range resultsn {
-		fmt.Println("Token", res.Token)
-	}
-
+	runner.RunScanner()
 }

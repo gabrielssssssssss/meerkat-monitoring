@@ -9,20 +9,19 @@ import (
 
 type Client struct {
 	http *http.Client
-	url  string
 }
 
-func NewClient(url string) *Client {
+func NewClient() *Client {
 	return &Client{
 		http: &http.Client{},
-		url:  url,
 	}
 }
 
-func (c *Client) GetTreeSize() (*Tree, error) {
-	url := c.url + "/get-sth"
+func (c *Client) GetTreeSize(url string) (*Tree, error) {
+	ctUrl := url + "ct/v1/get-sth"
 
-	resp, err := c.http.Get(url)
+	fmt.Println(ctUrl)
+	resp, err := c.http.Get(ctUrl)
 	if err != nil {
 		return nil, ErrExecRequest
 	}
@@ -41,10 +40,10 @@ func (c *Client) GetTreeSize() (*Tree, error) {
 	return &tree, nil
 }
 
-func (c *Client) GetEntries(start, end string) (*Entries, error) {
-	url := fmt.Sprintf("%s/get-entries?start=%s&end=%s", c.url, start, end)
+func (c *Client) GetEntries(url string, start, end int64) (*Entries, error) {
+	ctUrl := url + fmt.Sprintf("ct/v1/get-entries?start=%v&end=%v", start, end)
 
-	resp, err := c.http.Get(url)
+	resp, err := c.http.Get(ctUrl)
 	if err != nil {
 		return nil, ErrExecRequest
 	}

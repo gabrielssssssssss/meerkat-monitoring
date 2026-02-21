@@ -8,13 +8,13 @@ import (
 )
 
 type Options struct {
-	Cfg         string
-	NoColor     bool
-	Silent      bool
-	Threads     int
-	Timeout     int
-	Domain      string
-	DomainsFile string
+	Cfg          string
+	NoColor      bool
+	Silent       bool
+	Threads      int
+	Timeout      int
+	Transparency bool
+	DomainsFile  string
 }
 
 func ParseOptions() *Options {
@@ -24,7 +24,7 @@ func ParseOptions() *Options {
 	flagSet.SetDescription(`Meerkat is a GIT exposures monitoring that discovers private credentials.`)
 
 	flagSet.CreateGroup("input", "Input",
-		flagSet.StringVarP(&options.Domain, "domain", "d", "", "domains to find subdomains for"),
+		flagSet.BoolVar(&options.Transparency, "transparency", false, "run with transparency monitoring"),
 		flagSet.StringVarP(&options.DomainsFile, "list", "dL", "", "file containing list of domains for credentials discovery"),
 	)
 
@@ -35,11 +35,11 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("optimization", "Optimization",
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "seconds to wait before timing out"),
-		flagSet.IntVar(&options.Threads, "t", 10, "number of concurrent goroutines for resolving (-active only)"),
+		flagSet.IntVar(&options.Threads, "t", 50, "number of concurrent goroutines for resolving (-active only)"),
 	)
 
 	flagSet.CreateGroup("config", "Config",
-		flagSet.StringVarP(&options.Cfg, "conf", "c", "", "environnement variable (.yaml)"),
+		flagSet.StringVarP(&options.Cfg, "conf", "c", "env.yaml", "environnement variable (.yaml)"),
 	)
 
 	if err := flagSet.Parse(); err != nil {

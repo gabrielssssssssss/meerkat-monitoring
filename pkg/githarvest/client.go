@@ -3,34 +3,39 @@ package githarvest
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type Client struct {
 	http *http.Client
-	url  string
 }
 
-func NewClient(url string) *Client {
+func NewClient() *Client {
 	return &Client{
 		http: &http.Client{
-			Timeout: 30,
+			Timeout: 10 * time.Second,
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
 		},
-		url: url,
 	}
 }
 
-func (c *Client) IsGitExposed() (bool, error) {
-	url := c.url + "/.git/config"
+func (c *Client) IsGitExposed(url string) (bool, error) {
+	gitUrl := url + "/.git/config"
 
-	resp, err := c.http.Get(url)
+	resp, err := c.http.Get(gitUrl)
 	if err != nil {
+		fmt.Println(err)
+		return false, ErrExecRequest
+	}
+
+	if resp.StatusCode != 200 {
 		return false, ErrExecRequest
 	}
 
@@ -39,13 +44,13 @@ func (c *Client) IsGitExposed() (bool, error) {
 		return false, ErrReadBody
 	}
 
-	return strings.Contains("[core]", string(body)), nil
+	return strings.Contains(string(body), "[core]"), nil
 }
 
-func (c *Client) ExtractTokens(path string) ([]string, error) {
-	url := c.url + path
+func (c *Client) ExtractTokens(url, path string) ([]string, error) {
+	pathUrl := url + path
 
-	resp, err := c.http.Get(url)
+	resp, err := c.http.Get(pathUrl)
 	if err != nil {
 		return nil, ErrExecRequest
 	}
