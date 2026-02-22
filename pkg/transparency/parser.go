@@ -2,6 +2,7 @@ package transparency
 
 import (
 	"encoding/base64"
+	"strings"
 
 	ct "github.com/google/certificate-transparency-go"
 	ctTls "github.com/google/certificate-transparency-go/tls"
@@ -25,13 +26,13 @@ func ParseLeafInput(leafInput string) (string, error) {
 	case 0:
 		cert, _ := ctX509.ParseCertificate(payload.TimestampedEntry.X509Entry.Data)
 		for _, domain := range cert.DNSNames {
-			return domain, nil
+			return strings.Replace(domain, "*.", "", 1), nil
 		}
 
 	case 1:
 		cert, _ := ctX509.ParseTBSCertificate(payload.TimestampedEntry.PrecertEntry.TBSCertificate)
 		for _, domain := range cert.DNSNames {
-			return domain, nil
+			return strings.Replace(domain, "*.", "", 1), nil
 		}
 	default:
 		return "", ErrUnknownEntryType

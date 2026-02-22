@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"sync"
 
 	"github.com/gabrielssssssssss/meerkat-monitoring/config"
 	"github.com/gabrielssssssssss/meerkat-monitoring/internal/service"
@@ -41,5 +42,19 @@ func (r *Runner) RunScanner() error {
 }
 
 func (r *Runner) RunScannerWithCtx(ctx context.Context, cancel context.CancelFunc) error {
-	return r.MonitoringScanner(r.config.CtLogs)
+	domains := make(chan string, 10000)
+
+	var wg sync.WaitGroup
+
+	if len(r.config.CtLogs) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			r.MonitoringTransparency(ctx, r.config.CtLogs, domains)
+		}()
+	}
+
+	wg.Wait()
+
+	return r.GitScanner(ctx, domains)
 }
