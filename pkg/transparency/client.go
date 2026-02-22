@@ -1,10 +1,12 @@
 package transparency
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 type Client struct {
@@ -13,7 +15,12 @@ type Client struct {
 
 func NewClient() *Client {
 	return &Client{
-		http: &http.Client{},
+		http: &http.Client{
+			Timeout: 3 * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		},
 	}
 }
 

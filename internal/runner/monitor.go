@@ -16,7 +16,7 @@ func (r *Runner) MonitoringScanner(sources []string) error {
 }
 
 func (r *Runner) MonitoringScannerWithCtx(ctx context.Context, sources []string) error {
-	domains := make(chan string, 1000000)
+	domains := make(chan string, 1000000000)
 
 	for i := 0; i < r.options.Threads; i++ {
 		go func(int) {
@@ -24,11 +24,12 @@ func (r *Runner) MonitoringScannerWithCtx(ctx context.Context, sources []string)
 				url := "https://" + domain
 
 				isExposed, err := r.gitHarvest.IsGitExposed(url)
-				fmt.Println(url, isExposed)
 
 				if err != nil || (!isExposed) {
 					continue
 				}
+
+				fmt.Println(url, isExposed)
 
 				var validTokens []string
 
@@ -123,6 +124,12 @@ func (r *Runner) MonitoringTransparencyWithCtx(ctx context.Context, sources []st
 					}
 
 					cleanDomain := strings.Replace(domain, "*.", "", 1)
+
+					domainFound, _ := r.transparencyService.FindByDomain(cleanDomain)
+					if domainFound != nil {
+						continue
+					}
+
 					err = r.transparencyService.Create(&models.Transparency{
 						Domain:    cleanDomain,
 						CreatedAt: time.Now(),

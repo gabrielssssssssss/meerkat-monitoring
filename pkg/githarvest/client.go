@@ -3,7 +3,6 @@ package githarvest
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -31,7 +30,6 @@ func (c *Client) IsGitExposed(url string) (bool, error) {
 
 	resp, err := c.http.Get(gitUrl)
 	if err != nil {
-		fmt.Println(err)
 		return false, ErrExecRequest
 	}
 
