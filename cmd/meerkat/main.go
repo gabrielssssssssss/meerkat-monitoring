@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"os"
 
 	"github.com/gabrielssssssssss/meerkat-monitoring/config"
 	"github.com/gabrielssssssssss/meerkat-monitoring/internal/repository"
@@ -9,7 +9,15 @@ import (
 	"github.com/gabrielssssssssss/meerkat-monitoring/internal/service"
 	"github.com/gabrielssssssssss/meerkat-monitoring/pkg/githarvest"
 	"github.com/gabrielssssssssss/meerkat-monitoring/pkg/transparency"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
+
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+}
 
 func main() {
 	options := runner.ParseOptions()
@@ -19,7 +27,10 @@ func main() {
 
 	db, err := config.NewMongoDatabase(cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Error().
+			Err(err).
+			Str("component", "config.NewMongoDatabase").
+			Msg("Connection failed to MongoDB")
 	}
 
 	hitRepo := repository.NewHitRepository(db, cfg)

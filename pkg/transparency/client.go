@@ -27,7 +27,6 @@ func NewClient() *Client {
 func (c *Client) GetTreeSize(url string) (*Tree, error) {
 	ctUrl := url + "ct/v1/get-sth"
 
-	fmt.Println(ctUrl)
 	resp, err := c.http.Get(ctUrl)
 	if err != nil {
 		return nil, ErrExecRequest

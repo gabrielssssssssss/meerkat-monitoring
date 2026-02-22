@@ -2,13 +2,13 @@ package runner
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/gabrielssssssssss/meerkat-monitoring/internal/models"
 	"github.com/gabrielssssssssss/meerkat-monitoring/pkg/transparency"
+	"github.com/rs/zerolog/log"
 )
 
 func (r *Runner) MonitoringScanner(sources []string) error {
@@ -24,12 +24,14 @@ func (r *Runner) MonitoringScannerWithCtx(ctx context.Context, sources []string)
 				url := "https://" + domain
 
 				isExposed, err := r.gitHarvest.IsGitExposed(url)
-
 				if err != nil || (!isExposed) {
 					continue
 				}
 
-				fmt.Println(url, isExposed)
+				log.Info().
+					Str("URL", url).
+					Bool("Exposed", isExposed).
+					Msg("GIT exposed found")
 
 				var validTokens []string
 
@@ -72,9 +74,7 @@ func (r *Runner) MonitoringScannerWithCtx(ctx context.Context, sources []string)
 		}(i)
 	}
 
-	r.MonitoringTransparency(sources, domains)
-
-	return nil
+	return r.MonitoringTransparency(sources, domains)
 }
 
 func (r *Runner) MonitoringTransparency(sources []string, ch chan string) error {
@@ -87,13 +87,16 @@ func (r *Runner) MonitoringTransparencyWithCtx(ctx context.Context, sources []st
 		mu        sync.Mutex
 	)
 
-	fmt.Println(sources)
 	for _, source := range sources {
 		tree, err := r.transparency.GetTreeSize(source)
-
 		if err != nil {
 			continue
 		}
+
+		log.Info().
+			Str("CT Log", source).
+			Int64("Tree Size", tree.TreeSize).
+			Msg("Fetch Tree Size")
 
 		sourceInf[source] = tree.TreeSize
 	}
