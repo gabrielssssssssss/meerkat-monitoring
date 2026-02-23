@@ -42,19 +42,34 @@ func (r *Runner) RunScanner() error {
 }
 
 func (r *Runner) RunScannerWithCtx(ctx context.Context, cancel context.CancelFunc) error {
-	domains := make(chan string, 10000)
+	domains := make(chan string, 1000000)
 
 	var wg sync.WaitGroup
 
-	if len(r.config.CtLogs) > 0 {
+	if err := r.GitScanner(ctx, domains, &wg); err != nil {
+		return err
+	}
+
+	if len(r.config.CtLogs) > 0 && len(r.options.DomainsFile) == 0 {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			r.MonitoringTransparency(ctx, r.config.CtLogs, domains)
 		}()
+	} else if len(r.options.DomainsFile) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_ = r.LoadDomains(r.options.DomainsFile, domains)
+			close(domains)
+		}()
 	}
+
+	go func() {
+		r.Scheduler(ctx)
+	}()
 
 	wg.Wait()
 
-	return r.GitScanner(ctx, domains)
+	return nil
 }

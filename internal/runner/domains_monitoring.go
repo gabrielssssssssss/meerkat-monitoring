@@ -7,6 +7,7 @@ import (
 
 	"github.com/gabrielssssssssss/meerkat-monitoring/internal/models"
 	"github.com/gabrielssssssssss/meerkat-monitoring/pkg/transparency"
+	"github.com/rs/zerolog/log"
 )
 
 func (r *Runner) MonitoringTransparency(ctx context.Context, sources []string, ch chan string) error {
@@ -22,8 +23,17 @@ func (r *Runner) MonitoringTransparencyWithCtx(ctx context.Context, sources []st
 	for _, source := range sources {
 		tree, err := r.transparency.GetTreeSize(source)
 		if err != nil {
+			log.Warn().
+				Str("log_url", source).
+				Err(err).
+				Msg("Tree synchronization aborted")
 			continue
 		}
+
+		log.Info().
+			Str("log_url", source).
+			Int64("tree_size", tree.TreeSize).
+			Msg("Source tree size synchronized")
 
 		sourceInf[source] = tree.TreeSize
 	}
